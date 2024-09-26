@@ -1,7 +1,7 @@
 /// <reference types="Cypress" />
 
 describe('Central de Atendimento ao Cliente TAT', function() {
-
+    const threeMiliSeconds = 3000
     beforeEach(function(){
         cy.visit('./src/index.html')
     })
@@ -10,18 +10,26 @@ describe('Central de Atendimento ao Cliente TAT', function() {
         cy.title().should('be.equal','Central de Atendimento ao Cliente TAT')
     })
 
-    it('Preenche os campos obrigatórios e envia o formulário', function(){
-        const longText = 'Teste Teste Teste Teste Teste Teste Teste Teste Teste Teste Teste Teste Teste Teste Teste Teste Teste Teste'
-        cy.get('#firstName').type('Anderson')
-        cy.get('#lastName').type('Weber Júnior')
-        cy.get('#email').type('teste@teste.com')
-        cy.get('#open-text-area').type(longText, {delay:0})
-        cy.contains('button', 'Enviar').click()
+    Cypress._.times(3, function(){
+        it('Preenche os campos obrigatórios e envia o formulário', function(){
+            cy.clock()
 
-        cy.get('.success').should('be.visible')
+            const longText = Cypress._.repeat('Teste ', 30)
+            cy.get('#firstName').type('Anderson')
+            cy.get('#lastName').type('Weber Júnior')
+            cy.get('#email').type('teste@teste.com')
+            cy.get('#open-text-area').type(longText, {delay:0})
+            cy.contains('button', 'Enviar').click()
+
+            cy.get('.success').should('be.visible')
+
+            cy.tick(threeMiliSeconds)
+            cy.get('.success').should('not.be.visible')
+        })
     })
 
     it('exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', function(){
+        cy.clock()
         cy.get('#firstName').type('Anderson')
         cy.get('#lastName').type('Weber Júnior')
         cy.get('#email').type('teste@teste,com')
@@ -29,6 +37,9 @@ describe('Central de Atendimento ao Cliente TAT', function() {
         cy.contains('button', 'Enviar').click()
 
         cy.get('.error').should('be.visible')
+
+        cy.tick(threeMiliSeconds)
+        cy.get('.error').should('not.be.visible')
     })
 
     it('campo telefone continua vazio quando preenchido com valor nao numerico', function(){
@@ -36,6 +47,7 @@ describe('Central de Atendimento ao Cliente TAT', function() {
     })
 
     it('exibe mensagem de erro quando o telefone se torna obrigatório mas não é preenchido antes do envio do formulário', function(){
+        cy.clock()
         cy.get('#firstName').type('Anderson')
         cy.get('#lastName').type('Weber Júnior')
         cy.get('#email').type('teste@teste.com')
@@ -44,6 +56,8 @@ describe('Central de Atendimento ao Cliente TAT', function() {
         cy.contains('button', 'Enviar').click()
 
         cy.get('.error').should('be.visible')
+        cy.tick(threeMiliSeconds)
+        cy.get('.error').should('not.be.visible')
     })
 
     it('preenche e limpa os campos', function(){
@@ -81,17 +95,20 @@ describe('Central de Atendimento ao Cliente TAT', function() {
     })
 
     it('acessar e enviar, receber mensagem de erro', function(){
-        
+        cy.clock()
         cy.contains('button', 'Enviar').click()
         
         cy.get('.error').should('be.visible')
+        cy.tick(threeMiliSeconds)
+        cy.get('.error').should('not.be.visible')
     })  
 
     it('enviar formulario com comando personalizado', function(){
-        
+        cy.clock()
         cy.fillMandatoryFieldsAndSubmit()
-
         cy.get('.success').should('be.visible')
+        cy.tick(threeMiliSeconds)
+        cy.get('.success').should('not.be.visible')
     })  
 
     it('selecione um produto pelo texto (YouTube)', function(){
@@ -181,7 +198,7 @@ describe('Central de Atendimento ao Cliente TAT', function() {
         cy.get('#privacy a').should('have.attr', 'target', '_blank')
     })
 
-    it.only('acessa a página da política de privacidade removendo o target e então clicando no link', function(){
+    it('acessa a página da política de privacidade removendo o target e então clicando no link', function(){
         cy.get('#privacy a').invoke('removeAttr', 'target').click()
         cy.title().should('be.equal','Central de Atendimento ao Cliente TAT - Política de privacidade')
     })
